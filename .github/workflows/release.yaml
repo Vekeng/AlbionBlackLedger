@@ -25,7 +25,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyinstaller
         pip install -r requirements.txt
-
     - name: 🔧 Build EXE with PyInstaller
       run: |
         pyinstaller --onefile --windowed main.py `
