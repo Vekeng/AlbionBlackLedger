@@ -31,7 +31,7 @@ jobs:
         curl -L -o items.json https://raw.githubusercontent.com/ao-data/ao-bin-dumps/refs/heads/master/formatted/items.json
 
     - name: Run item parser
-        run: python items_parser.py
+      run: python items_parser.py
     
     - name: 🔧 Build EXE with PyInstaller
       run: |
