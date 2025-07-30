@@ -13,6 +13,14 @@ It listens to live market data sent from the [Albion Data Client](https://github
 
 ---
 
+## ✨ Features
+
+🔄 Real-Time Market Logging – Instantly captures data as you browse the in-game market
+💾 Local-Only Storage – All data is saved on your machine; no uploads, no sharing
+🪄 Supports Flips with enchantments – buy, enchant, sell for even more profit
+
+---
+
 ## 📥 Install Albion Data Client
 
 1. Download the latest release from:
