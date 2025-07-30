@@ -43,8 +43,8 @@ jobs:
 
     - name: 🚚 Move EXE to root
       run: |
-        VERSION=${GITHUB_REF##*/}
-        move dist\\AlbionBlackLedger.exe AlbionBlackLedger-$VERSION.exe
+        $version = "${env:GITHUB_REF}".Split("/")[-1]
+        move dist\\AlbionBlackLedger.exe AlbionBlackLedger-$version.exe
 
     - name: 🚀 Create GitHub Release
       uses: softprops/action-gh-release@v2
