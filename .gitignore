@@ -2,5 +2,5 @@
 /dist
 /venv
 /__pycache__
-marketdata.db
-main.spec
+/marketdata.db
+/main.spec
