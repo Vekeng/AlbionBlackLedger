@@ -5,6 +5,15 @@ from tkinter import ttk
 import tkinter as tk
 from db import truncate
 from PIL import Image, ImageTk
+import sys
+import os
+
+if getattr(sys, 'frozen', False):
+    # Running in bundle (PyInstaller)
+    base_path = sys._MEIPASS
+else:
+    # Running in script
+    base_path = os.path.dirname(__file__)
 
 root = None
 tree = None
@@ -48,8 +57,8 @@ def show_table(initial_data, data_fetch_fn):
 
     root = tb.Window(themename="darkly")
     root.title("Albion Online Black Ledger")
-    ico = Image.open('blackledger.png')
-    photo = ImageTk.PhotoImage(ico)
+    icon_path = os.path.join(base_path,"blackledger.png")
+    photo = ImageTk.PhotoImage(file=icon_path)
     root.wm_iconphoto(False, photo)
 
     # === Dropdown + Button Panel ===

@@ -1,8 +1,15 @@
 import json
+import sys
+import os
 
 def load_items(): 
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.dirname(__file__)
+    items_path = os.path.join(base_path, "items.json")
     # Load JSON data from file
-    with open("items.json", "r", encoding="utf-8") as file:
+    with open(items_path, "r", encoding="utf-8") as file:
         data = json.load(file)
 
     # Safely build dictionary
