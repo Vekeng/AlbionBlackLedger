@@ -27,7 +27,18 @@ It listens to live market data sent from the [Albion Data Client](https://github
 
    👉 [https://github.com/ao-data/albiondata-client/releases](https://github.com/ao-data/albiondata-client/releases)
 
-2. Extract the archive and run the client **with the correct listener argument**:
+### On Windows
+1. **Open Command Prompt or PowerShell**  
+   - Press `Win + R`, type `cmd` or `powershell`, then press Enter.
 
-   ```bash
-   albiondata-client.exe -i http://localhost:5000
+2. **Navigate to the installation folder**  
+
+   ```powershell
+   cd "C:\Program Files\Albion Data Client"
+
+3. **Run the client with the local server URL**
+
+   .\albiondata-client.exe -i http://localhost:5000
+
+### On Linux
+If you are on Linux, you should now what to do. 
