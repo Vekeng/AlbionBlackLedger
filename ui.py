@@ -141,7 +141,7 @@ def show_table(data_fetch_fn):
     tb.Button(control_frame, text="Find Flips!", command=on_refresh, bootstyle="primary").pack(side=tk.LEFT, padx=10)
     tb.Button(control_frame, text="Clear data", command=on_clear, bootstyle="danger").pack(side=tk.LEFT, padx=10)
     label = tb.Label(
-        control_frame,  # Replace with your actual parent frame (e.g., `root`, `control_frame`, etc.)
+        control_frame,
         text="⚠️ No profitable flips found.",
         foreground="orange",
         font=("Segoe UI", 10, "bold"),

@@ -76,7 +76,6 @@ def calculate_total_enchant_cost(item_group_type_id, tier, enchant_from, enchant
             f"{n}x {tier}_{material} @ {material_cost:,} = {step_total:,}{warning_icon}"
         )
 
-    #materials_detailed.append(f"(Total: {int(total_cost):,})")
     return total_cost, materials_detailed
 
 def find_flip(from_market="3005", to_market="3003", premium=True, material_prices=None):
@@ -165,7 +164,7 @@ def find_flip(from_market="3005", to_market="3003", premium=True, material_price
         if match:
             tier = int(match.group(1))
         else:
-            tier = None  # Or set to 0 if you prefer a fallback
+            tier = None  
 
         if profit > 0:
             result.append(
