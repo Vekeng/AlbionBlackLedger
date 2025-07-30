@@ -55,12 +55,24 @@ jobs:
     - name: 🚚 Rename EXE with version
       run: |
         move dist\\AlbionBlackLedger.exe AlbionBlackLedger-${{ env.VERSION }}.exe
-
+    - name: 📜 Generate changelog from previous tag
+      id: changelog
+      shell: bash
+      run: |
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+        echo "Previous tag: $PREV_TAG"
+        LOG=$(git log "$PREV_TAG"..HEAD --pretty=format:"- %s")
+        echo "$LOG"
+        echo "log<<EOF" >> $GITHUB_OUTPUT
+        echo "$LOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
     - name: 🚀 Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         name: AlbionBlackLedger ${{ env.VERSION }}
         tag_name: ${{ github.ref_name }}
+        body: ${{ steps.changelog.outputs.log }}
         files: AlbionBlackLedger-${{ env.VERSION }}.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
