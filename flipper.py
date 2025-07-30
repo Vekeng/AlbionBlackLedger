@@ -1,8 +1,20 @@
 import sqlite3
-from items_parser import load_items
 import re
+import json
+import sys
+import os
 
-items_map = load_items()
+if getattr(sys, 'frozen', False):
+    # Running in bundle (PyInstaller)
+    base_path = sys._MEIPASS
+else:
+    # Running in script
+    base_path = os.path.dirname(__file__)
+
+items_path = os.path.join(base_path, "item_map.json")
+
+with open(items_path, "r", encoding="utf-8") as file:
+    items_map = json.load(file)
 
 # N values based on item type
 N_VALUES = {
@@ -24,8 +36,6 @@ qualities = {
     5: "Masterpiece"
 }
 
-
-
 locations = {
     "2004": "Bridgewatch",
     "3008": "Martlock",
@@ -36,7 +46,41 @@ locations = {
     "3003": "Black Market"
 }
 
+def get_average_material_price(item_type_id, location_id="3003"):
+    query = """
+            WITH ordered_orders AS (
+                SELECT
+                    UnitPriceSilver,
+                    Amount,
+                    SUM(Amount) OVER (ORDER BY UnitPriceSilver) AS running_amount
+                FROM orders
+                WHERE AuctionType = 'offer'
+                    AND LocationId = ?
+                    AND ItemTypeId = ?
+                ),
+                limited_orders AS (
+                SELECT
+                    UnitPriceSilver,
+                    CASE
+                    WHEN running_amount <= 2000 THEN Amount
+                    WHEN running_amount - Amount < 2000 THEN 2000 - (running_amount - Amount)
+                    ELSE 0
+                    END AS limited_amount
+                FROM ordered_orders
+                )
+                SELECT
+                CAST(SUM(UnitPriceSilver * limited_amount) * 1.0 / SUM(limited_amount) / 10000 AS INTEGER) AS average_price
+                FROM limited_orders
+                WHERE limited_amount > 0;
+    """
 
+    conn = sqlite3.connect("marketdata.db")
+    cur = conn.cursor()
+    cur.execute(query, (location_id, item_type_id))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row[0] if row[0] else 0
 
 def get_n_value(item_group_type_id):
     for key in N_VALUES:

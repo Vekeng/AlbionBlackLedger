@@ -5,7 +5,9 @@ import tkinter as tk
 from db import truncate
 import sys
 import os
-import sqlite3
+from flipper import get_average_material_price
+from flipper import find_flip
+
 
 if getattr(sys, 'frozen', False):
     # Running in bundle (PyInstaller)
@@ -48,7 +50,7 @@ LOCATIONS = {
     "Black Market": "3003"
 }
 
-def show_table(data_fetch_fn):
+def show_table():
     global root, tree, current_data, price_vars
 
     root = tb.Window(themename="darkly")
@@ -91,51 +93,14 @@ def show_table(data_fetch_fn):
         selected_from = LOCATIONS[from_var.get()]
         selected_to = LOCATIONS[to_var.get()]
         material_prices = get_price_inputs()
-        new_data = data_fetch_fn(selected_from, selected_to, premium_var.get(), material_prices)
+        new_data = find_flip(selected_from, selected_to, premium_var.get(), material_prices)
         if new_data: 
             label.pack_forget()
             update_table(new_data)
         else: 
-            label.pack(pady=5)
+            label.pack(side=tk.LEFT, padx=10)
             update_table([])
 
-    def get_average_material_price(item_type_id, location_id="3003"):
-        query = """
-                WITH ordered_orders AS (
-                    SELECT
-                        UnitPriceSilver,
-                        Amount,
-                        SUM(Amount) OVER (ORDER BY UnitPriceSilver) AS running_amount
-                    FROM orders
-                    WHERE AuctionType = 'offer'
-                        AND LocationId = ?
-                        AND ItemTypeId = ?
-                    ),
-                    limited_orders AS (
-                    SELECT
-                        UnitPriceSilver,
-                        CASE
-                        WHEN running_amount <= 2000 THEN Amount
-                        WHEN running_amount - Amount < 2000 THEN 2000 - (running_amount - Amount)
-                        ELSE 0
-                        END AS limited_amount
-                    FROM ordered_orders
-                    )
-                    SELECT
-                    CAST(SUM(UnitPriceSilver * limited_amount) * 1.0 / SUM(limited_amount) / 10000 AS INTEGER) AS average_price
-                    FROM limited_orders
-                    WHERE limited_amount > 0;
-        """
-
-        conn = sqlite3.connect("marketdata.db")
-        cur = conn.cursor()
-        cur.execute(query, (location_id, item_type_id))
-        row = cur.fetchone()
-        cur.close()
-        conn.close()
-        return row[0] if row else 0
-
-    
     premium_var = tk.BooleanVar(value=True)  # Checked by default
     tb.Checkbutton(control_frame, text="Premium", variable=premium_var, bootstyle="success-round-toggle").pack(side=tk.LEFT, padx=10)
     tb.Button(control_frame, text="Find Flips!", command=on_refresh, bootstyle="primary").pack(side=tk.LEFT, padx=10)
@@ -147,7 +112,7 @@ def show_table(data_fetch_fn):
         font=("Segoe UI", 10, "bold"),
         bootstyle="warning"
         )
-    label.pack(pady=5)
+    label.pack(side=tk.LEFT, padx=10)
     label.pack_forget()
 
     # === Main Content Frame ===
@@ -165,7 +130,6 @@ def show_table(data_fetch_fn):
         tree.heading(col, text=heading, command=lambda c=col: sort_column(tree, c, False))
         if col in ("buy_price", "sell_price", "buy_quality", "sell_quality"):
             tree.column(col, anchor="center", width=20)
-            print(col)
         elif col == "enchantment": 
             tree.column(col, anchor="center", width=220)
         else: 
@@ -190,9 +154,6 @@ def show_table(data_fetch_fn):
                 key = f"T{tier}_{mat}"
                 if key in price_vars:
                     price_vars[key].set(str(avg_price))
-
-
-    
 
     tiers = range(4, 9)  # T4 to T8
     materials = ["RUNE", "SOUL", "RELIC"]

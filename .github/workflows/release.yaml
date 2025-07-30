@@ -25,10 +25,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyinstaller
         pip install -r requirements.txt
+
+    - name: Download items.json
+      run: |
+        curl -L -o items.json https://raw.githubusercontent.com/ao-data/ao-bin-dumps/refs/heads/master/formatted/items.json
+
+    - name: Run item parser
+        run: python items_parser.py
+    
     - name: 🔧 Build EXE with PyInstaller
       run: |
         pyinstaller --onefile --windowed main.py `
-          --add-data "items.json;." `
+          --add-data "item_map.json;." `
           --add-data "blackledger.ico;." `
           --icon=blackledger.ico `
           --name AlbionBlackLedger
