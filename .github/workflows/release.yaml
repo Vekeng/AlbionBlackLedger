@@ -3,13 +3,17 @@ name: Build and Release AlbionBlackLedger
 on:
   push:
     tags:
-      - 'v*'  # Trigger workflow on version tags like
+      - 'v*'
+
 permissions:
   contents: write
-  
+
 jobs:
   build:
     runs-on: windows-latest
+
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
 
     steps:
     - name: 📥 Checkout code
@@ -26,13 +30,20 @@ jobs:
         pip install pyinstaller
         pip install -r requirements.txt
 
-    - name: Download items.json
+    - name: 📄 Extract version
+      id: set_version
+      run: |
+        $version = "${env:GITHUB_REF}".Split("/")[-1]
+        echo "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+        echo "::set-output name=version::$version"
+
+    - name: ⬇️ Download items.json
       run: |
         curl -L -o items.json https://raw.githubusercontent.com/ao-data/ao-bin-dumps/refs/heads/master/formatted/items.json
 
-    - name: Run item parser
+    - name: 🧪 Run item parser
       run: python items_parser.py
-    
+
     - name: 🔧 Build EXE with PyInstaller
       run: |
         pyinstaller --onefile --windowed main.py `
@@ -41,16 +52,15 @@ jobs:
           --icon=blackledger.ico `
           --name AlbionBlackLedger
 
-    - name: 🚚 Move EXE to root
+    - name: 🚚 Rename EXE with version
       run: |
-        $version = "${env:GITHUB_REF}".Split("/")[-1]
-        move dist\\AlbionBlackLedger.exe AlbionBlackLedger-$version.exe
+        move dist\\AlbionBlackLedger.exe AlbionBlackLedger-${{ env.VERSION }}.exe
 
     - name: 🚀 Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        name: AlbionBlackLedger ${{ github.ref_name }}
+        name: AlbionBlackLedger ${{ env.VERSION }}
         tag_name: ${{ github.ref_name }}
-        files: AlbionBlackLedger-$version.exe
+        files: AlbionBlackLedger-${{ env.VERSION }}.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
