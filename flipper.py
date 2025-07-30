@@ -4,13 +4,6 @@ import re
 
 items_map = load_items()
 
-# Tiered material prices (in silver)
-MATERIAL_PRICES = {
-    "RUNE": {"T4": 10, "T5": 55, "T6": 204, "T7": 894, "T8": 3500},
-    "SOUL": {"T4": 116, "T5": 250, "T6": 1116, "T7": 3200, "T8": 10000},
-    "RELIC": {"T4": 474, "T5": 1225, "T6": 3800, "T7": 13000, "T8": 33000},
-}
-
 # N values based on item type
 N_VALUES = {
     "MAIN": 288,
@@ -50,7 +43,7 @@ def get_n_value(item_group_type_id):
     return None
 
 
-def calculate_total_enchant_cost(item_group_type_id, tier, enchant_from, enchant_to):
+def calculate_total_enchant_cost(item_group_type_id, tier, enchant_from, enchant_to, material_prices):
     n = get_n_value(item_group_type_id)
     if n is None:
         return None, []
@@ -69,19 +62,22 @@ def calculate_total_enchant_cost(item_group_type_id, tier, enchant_from, enchant
             return None, []
 
         try:
-            material_cost = MATERIAL_PRICES[material][tier]
+            material_cost = material_prices[material][tier]
         except KeyError:
-            return None, []
+            material_cost = 0
 
         step_total = n * material_cost
         total_cost += step_total
 
-        materials_detailed.append(f"{n}x {tier}_{material} @ {material_cost:,} = {step_total:,}")
+        warning_icon = " ⚠️" if material_cost == 0 else ""
+        materials_detailed.append(
+            f"{n}x {tier}_{material} @ {material_cost:,} = {step_total:,}{warning_icon}"
+        )
 
-    return total_cost, materials_detailed  # Return cost in k-silver and string list
+    #materials_detailed.append(f"(Total: {int(total_cost):,})")
+    return total_cost, materials_detailed
 
-
-def find_flip(from_market="3005", to_market="3003", premium=True):
+def find_flip(from_market="3005", to_market="3003", premium=True, material_prices=None):
     tax_rate = 0.96 if premium else 0.92
     connect = sqlite3.connect("marketdata.db")
     connect.row_factory = sqlite3.Row
@@ -149,7 +145,7 @@ def find_flip(from_market="3005", to_market="3003", premium=True):
 
         if enchant_from < enchant_to:
             enchant_cost, materials = calculate_total_enchant_cost(
-                item_group, tier, enchant_from, enchant_to
+                item_group, tier, enchant_from, enchant_to, material_prices
             )
             if enchant_cost is None:
                 continue
@@ -158,8 +154,6 @@ def find_flip(from_market="3005", to_market="3003", premium=True):
         else:
             enchant_cost = 0
             enchantment_str = ""
-
-
         total_cost = row["buy_price"] + enchant_cost
         net_sell_price = row["sell_price"] * tax_rate
         profit = int(round(net_sell_price - total_cost))

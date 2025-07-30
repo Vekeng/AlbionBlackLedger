@@ -12,5 +12,4 @@ if __name__ == '__main__':
     create()
     ingest_thread = threading.Thread(target=run_server, daemon=True)
     ingest_thread.start()
-    data = find_flip()
-    show_table(data, find_flip)  # pass both the data and the fetch function
+    show_table(find_flip)  # pass both the data and the fetch function
