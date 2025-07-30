@@ -5,6 +5,7 @@ import tkinter as tk
 from db import truncate
 import sys
 import os
+import sqlite3
 
 if getattr(sys, 'frozen', False):
     # Running in bundle (PyInstaller)
@@ -97,6 +98,44 @@ def show_table(data_fetch_fn):
         else: 
             label.pack(pady=5)
             update_table([])
+
+    def get_average_material_price(item_type_id, location_id="3003"):
+        query = """
+                WITH ordered_orders AS (
+                    SELECT
+                        UnitPriceSilver,
+                        Amount,
+                        SUM(Amount) OVER (ORDER BY UnitPriceSilver) AS running_amount
+                    FROM orders
+                    WHERE AuctionType = 'offer'
+                        AND LocationId = ?
+                        AND ItemTypeId = ?
+                    ),
+                    limited_orders AS (
+                    SELECT
+                        UnitPriceSilver,
+                        CASE
+                        WHEN running_amount <= 2000 THEN Amount
+                        WHEN running_amount - Amount < 2000 THEN 2000 - (running_amount - Amount)
+                        ELSE 0
+                        END AS limited_amount
+                    FROM ordered_orders
+                    )
+                    SELECT
+                    CAST(SUM(UnitPriceSilver * limited_amount) * 1.0 / SUM(limited_amount) / 10000 AS INTEGER) AS average_price
+                    FROM limited_orders
+                    WHERE limited_amount > 0;
+        """
+
+        conn = sqlite3.connect("marketdata.db")
+        cur = conn.cursor()
+        cur.execute(query, (location_id, item_type_id))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return row[0] if row else 0
+
+    
     premium_var = tk.BooleanVar(value=True)  # Checked by default
     tb.Checkbutton(control_frame, text="Premium", variable=premium_var, bootstyle="success-round-toggle").pack(side=tk.LEFT, padx=10)
     tb.Button(control_frame, text="Find Flips!", command=on_refresh, bootstyle="primary").pack(side=tk.LEFT, padx=10)
@@ -120,11 +159,18 @@ def show_table(data_fetch_fn):
     table_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     style = tb.Style()
-    style.configure("dark.Treeview", rowheight=140)
+    style.configure("dark.Treeview", rowheight=100)
     tree = ttk.Treeview(table_frame, columns=COLUMNS, show="headings", style="dark.Treeview")
     for col, heading in zip(COLUMNS, HEADINGS):
         tree.heading(col, text=heading, command=lambda c=col: sort_column(tree, c, False))
-        tree.column(col, anchor="center", width=100)
+        if col in ("buy_price", "sell_price", "buy_quality", "sell_quality"):
+            tree.column(col, anchor="center", width=20)
+            print(col)
+        elif col == "enchantment": 
+            tree.column(col, anchor="center", width=220)
+        else: 
+            tree.column(col, anchor="center", width=100)
+            
 
     scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview, bootstyle="secondary")
     tree.configure(yscroll=scrollbar.set)
@@ -134,6 +180,19 @@ def show_table(data_fetch_fn):
     # Right: Material Prices in one vertical column grouped by tier
     price_frame = tb.Labelframe(content_frame, text="Material Prices", padding=10)
     price_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(10, 0), anchor="n")
+
+    def populate_material_prices():
+        selected_from = LOCATIONS[from_var.get()]
+        for tier in tiers:
+            for mat in materials:
+                item_type = f"T{tier}_{mat}"
+                avg_price = get_average_material_price(item_type, selected_from)
+                key = f"T{tier}_{mat}"
+                if key in price_vars:
+                    price_vars[key].set(str(avg_price))
+
+
+    
 
     tiers = range(4, 9)  # T4 to T8
     materials = ["RUNE", "SOUL", "RELIC"]
@@ -151,7 +210,19 @@ def show_table(data_fetch_fn):
 
             tb.Label(mat_frame, text=mat + ":", width=8, anchor="w").pack(side=tk.LEFT)
             tb.Entry(mat_frame, textvariable=price_vars[key], width=10).pack(side=tk.LEFT)
-
+    tb.Button(price_frame, text="Get Prices", command=populate_material_prices, bootstyle="success").pack(fill="x", pady=(10, 0))
+    estimate = tb.Label(
+        price_frame,
+        text="Prices are approximate, calculated from the 2,000 cheapest materials",
+        foreground="Orange",
+        font=("Segoe UI", 10, "bold"),
+        bootstyle="warning",
+        wraplength=140,
+        justify="center"
+        )
+    estimate.pack(pady=5)
+    root.geometry("1280x900")
+    root.minsize(width=1280, height=900)
     root.mainloop()
 
 

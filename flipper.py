@@ -36,6 +36,8 @@ locations = {
     "3003": "Black Market"
 }
 
+
+
 def get_n_value(item_group_type_id):
     for key in N_VALUES:
         if key in item_group_type_id:
@@ -183,30 +185,3 @@ def find_flip(from_market="3005", to_market="3003", premium=True, material_price
 
     result.sort(key=lambda x: x["profit"], reverse=True)
     return result
-
-
-def pretty_print(flip_data):
-    for entry in flip_data:
-        item = entry["ItemTypeId"]
-        buy_quality = entry["buy_quality"]
-        buy_location = entry["buy_location"]
-        buy_price = entry["buy_price"]
-        sell_location = entry["sell_location"]
-        sell_quality = entry["sell_quality"]
-        sell_price = entry["sell_price"]
-        profit = entry["profit"]
-        tax = entry["tax"]
-        enchantment = (
-            f" ({entry['buy_enchantment']}→{entry['sell_enchantment']})"
-            if entry["buy_enchantment"] != entry["sell_enchantment"]
-            else ""
-        )
-        materials = entry["materials"]
-
-        print(
-            f"Buy {item} Q{buy_quality} in {buy_location}{enchantment} for {buy_price:,}, "
-            f"sell to {sell_location} Q{sell_quality} for {sell_price:,} — "
-            f"Profit: {profit:,} (Tax: {tax})"
-        )
-        if materials:
-            print(f"  Enchant using: {materials}")
