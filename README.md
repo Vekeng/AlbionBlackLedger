@@ -23,11 +23,14 @@ It listens to live market data sent from the [Albion Data Client](https://github
 
 ## 📥 Install Albion Data Client
 
-1. Download the latest release from:
+1. **Download the latest release from:**
 
    👉 [https://github.com/ao-data/albiondata-client/releases](https://github.com/ao-data/albiondata-client/releases)
 
+2. **Install the client**
+
 ### On Windows
+Start the albiondata-client.exe with `-i http://localhost:5000`: 
 1. **Open Command Prompt or PowerShell**  
    - Press `Win + R`, type `cmd` or `powershell`, then press Enter.
 
