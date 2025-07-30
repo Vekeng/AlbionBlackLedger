@@ -42,7 +42,9 @@ jobs:
           --name AlbionBlackLedger
 
     - name: 🚚 Move EXE to root
-      run: move dist\\AlbionBlackLedger.exe AlbionBlackLedger.exe
+      run: |
+        VERSION=${GITHUB_REF##*/}
+        move dist\\AlbionBlackLedger.exe AlbionBlackLedger-$VERSION.exe
 
     - name: 🚀 Create GitHub Release
       uses: softprops/action-gh-release@v2
