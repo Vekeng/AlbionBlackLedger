@@ -21,16 +21,15 @@ current_data = []
 
 # Predefined columns and mock location list
 COLUMNS = [
-    "ItemTypeId", "buy_location", "buy_quality", "buy_enchantment",
+    "ItemTypeId", "buy_location", "buy_quality", 
     "buy_price", "sell_location", "sell_quality", "sell_enchantment",
-    "sell_price", "enchantment", "profit", "tax"
+    "sell_price", "enchantment", "profit"
 ]
 
 HEADINGS = [
     "Buy Item",
     "Buy Location",
     "Buy Quality",
-    "Buy Enchantment",
     "Buy Price",
     "Sell Location",
     "Sell Quality",
@@ -38,7 +37,6 @@ HEADINGS = [
     "Sell Price",
     "Enchantment",
     "Profit",
-    "Tax"
 ]
 
 
