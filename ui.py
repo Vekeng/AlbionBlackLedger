@@ -55,9 +55,8 @@ def show_table(initial_data, data_fetch_fn):
 
     root = tb.Window(themename="darkly")
     root.title("Albion Online Black Ledger")
-    icon_path = os.path.join(base_path,"blackledger.png")
-    photo = ImageTk.PhotoImage(file=icon_path)
-    root.wm_iconphoto(False, photo)
+    icon_path = os.path.join(base_path,"blackledger.ico")
+    root.wm_iconbitmap(icon_path)
 
     # === Dropdown + Button Panel ===
     control_frame = tb.Frame(root, padding=10)

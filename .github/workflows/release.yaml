@@ -29,7 +29,8 @@ jobs:
       run: |
         pyinstaller --onefile --windowed main.py `
           --add-data "items.json;." `
-          --add-data "blackledger.png;." `
+          --add-data "blackledger.ico;." `
+          --icon=blackledger.ico `
           --name AlbionBlackLedger
 
     - name: 🚚 Move EXE to root
