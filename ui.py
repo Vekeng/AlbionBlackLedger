@@ -9,8 +9,7 @@ from flipper import get_average_material_price
 from flipper import find_flip
 from flipper import claim_flip
 from flipper import delete_row
-
-
+import psutil
 if getattr(sys, 'frozen', False):
     # Running in bundle (PyInstaller)
     base_path = sys._MEIPASS
@@ -55,6 +54,15 @@ LOCATIONS = {
     "Caerleon": "3005",
     "Black Market": "3003"
 }
+
+def is_process_running(name: str) -> bool:
+    for proc in psutil.process_iter(['name']):
+        try:
+            if proc.info['name'] and name.lower() in proc.info['name'].lower():
+                return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return False
 
 def show_table():
     global root, tree, current_data, price_vars
@@ -261,9 +269,18 @@ def show_table():
     estimate.pack(pady=5)
     root.geometry("1600x900")
     #root.minsize(width=1280, height=900)
+
+    def update_status():
+        if is_process_running("albiondata-client"):
+            status_label.config(text="🟢 Data Client is running", fg="green")
+        else:
+            status_label.config(text="⭕ Data Client is NOT running", fg="red")
+        root.after(3000, update_status)  # check again in 3 seconds
+
+    status_label = tk.Label(control_frame, text="", font=("Segoe UI", 10))
+    status_label.pack(side="right", fill="x", pady=5)
+    update_status()
     root.mainloop()
-
-
 
 def update_table(data):
     global tree
