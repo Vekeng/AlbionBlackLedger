@@ -53,22 +53,74 @@ def delete_row(buy_id, sell_id):
     cursor.commit()
     cursor.close()
 
-def claim_flip(flip): 
+def delete_claim(id): 
     cursor = sqlite3.connect("marketdata.db")
-    query = """
-            INSERT OR REPLACE INTO claimed (
-                ItemTypeId, 
-                Enchantment, 
-                Profit
-            ) VALUES (
-                :item,
-                :enchantment, 
-                :profit
-            )
-    """
-    cursor.execute(query, flip)
+    query = "DELETE FROM claimed WHERE id = ?"
+    cursor.execute(query, [id])
     cursor.commit()
     cursor.close()
+
+def get_profit():
+    cursor = sqlite3.connect("marketdata.db")
+    query = "SELECT SUM(profit) AS total_profit FROM claimed;"
+    row = cursor.execute(query).fetchone()
+    cursor.close()
+    total_profit = row[0] if row[0] is not None else 0
+    profit_var = f"💰 Total Profit: {total_profit:,}"
+    return profit_var
+
+def claim_flip(flip): 
+    cursor = sqlite3.connect("marketdata.db")
+
+    values = (
+        flip["buy_id"],
+        flip["ItemTypeId"],
+        flip["buy_location"],
+        flip["buy_quality"],
+        flip["buy_amount"],
+        flip["buy_price"],
+        flip["sell_id"],
+        flip["sell_location"],
+        flip["sell_quality"],
+        flip["sell_amount"],
+        flip["sell_enchantment"],
+        flip["sell_price"],
+        flip["enchantment"],
+        flip["profit"],
+    )
+
+    query = """
+            INSERT INTO claimed (
+                buy_id,
+                ItemTypeId,
+                buy_location,
+                buy_quality,
+                buy_amount,
+                buy_price,
+                sell_id,
+                sell_location,
+                sell_quality,
+                sell_amount,
+                sell_enchantment,
+                sell_price,
+                enchantment,
+                profit
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    """
+    cursor.execute(query, values)
+    cursor.commit()
+    cursor.close()
+
+def get_all_claims(): 
+    connect = sqlite3.connect("marketdata.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
+    query = "SELECT * FROM claimed;"
+    rows = cursor.execute(query).fetchall()
+    cursor.close()
+    connect.close()
+    rows_as_dicts = [dict(row) for row in rows]
+    return rows_as_dicts
 
 def get_average_material_price(item_type_id, location_id="3003"):
     query = """

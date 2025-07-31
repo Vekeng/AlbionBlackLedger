@@ -18,17 +18,35 @@ def create():
     );
     cursor.execute('''
                     CREATE TABLE IF NOT EXISTS claimed (
-                   Id INTEGER PRIMARY KEY, 
-                   ItemTypeId TEXT NOT NULL,
-                   Enchantment INTEGER NOT NULL, 
-                   Profit INTEGER NOT NULL)
+                        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                        buy_id INTEGER,
+                        ItemTypeId TEXT NOT NULL,
+                        buy_location TEXT NOT NULL,
+                        buy_quality TEXT NOT NULL,
+                        buy_amount INTEGER NOT NULL,
+                        buy_price INTEGER NOT NULL,
+                        sell_id INTEGER UNIQUE NOT NULL,
+                        sell_location TEXT NOT NULL,
+                        sell_quality TEXT NOT NULL,
+                        sell_amount INTEGER NOT NULL,
+                        sell_enchantment TEXT,
+                        sell_price INTEGER NOT NULL,
+                        enchantment TEXT,
+                        profit INTEGER NOT NULL
+                    );
                    '''
     )
     cursor.commit()
     cursor.close()
 
-def truncate(): 
+def truncate_flips(): 
     cursor = sqlite3.connect("marketdata.db")
     cursor.execute("DELETE FROM orders")
+    cursor.commit()
+    cursor.close()
+
+def truncate_claimed():
+    cursor = sqlite3.connect("marketdata.db")
+    cursor.execute("DELETE FROM claimed")
     cursor.commit()
     cursor.close()
