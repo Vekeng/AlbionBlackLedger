@@ -1,5 +1,7 @@
 # 🧾 Albion Online Black Ledger
 
+## 🧾 Download [HERE](https://github.com/Vekeng/AlbionBlackLedger/releases)
+
 ## 📚 Table of Contents
 
 - 🧾 [Albion Online Black Ledger](#-albion-online-black-ledger)
@@ -17,8 +19,6 @@
 It listens to live market data sent from the [Albion Data Client](https://github.com/ao-data/albiondata-client) and stores it locally in an SQLite database for filtering, sorting, and future analysis — all within a clean graphical interface.
 
 ---
-
-## 🧾 [Download](https://github.com/Vekeng/AlbionBlackLedger/releases)
 
 ## ⚙️ Requirements
 
