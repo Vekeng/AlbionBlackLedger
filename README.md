@@ -2,13 +2,13 @@
 
 ## 📚 Table of Contents
 
-- [🧾 Albion Online Black Ledger](#-albion-online-black-ledger)
-- [⚙️ Requirements](#️-requirements)
-- [✨ Features](#-features)
-- [📥 Albion Data Client](#-albion-data-client)
+- 🧾 [Albion Online Black Ledger](#-albion-online-black-ledger)
+- ⚙️ [Requirements](#️-requirements)
+- ✨ [Features](#-features)
+- 📥 [Albion Data Client](#-albion-data-client)
   - [On Windows](#on-windows)
   - [On Linux](#on-linux)
-- [💡 How to use Black Ledger](#-how-to-use-black-ledger)
+- 💡 [How to use Black Ledger](#-how-to-use-black-ledger)
 
 ---
 
@@ -60,7 +60,7 @@ If you are on Linux, you should now what to do.
 
 ---
 
-## 💡How to use Black Ledger
+## 💡 How to use Black Ledger
 
 1. **With Albion Data Client running, scan the market where you buy items and Black Market** - go to market in game and start browsing items for potential flips. 
 
