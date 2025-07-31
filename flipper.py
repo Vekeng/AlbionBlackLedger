@@ -135,7 +135,8 @@ def calculate_total_enchant_cost(item_group_type_id, tier, enchant_from, enchant
             material_cost = material_prices[material][tier]
         except KeyError:
             material_cost = 0
-
+        if material_cost == 0:
+            return None, []
         step_total = n * material_cost
         total_cost += step_total
 
