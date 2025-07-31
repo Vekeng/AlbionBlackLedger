@@ -18,6 +18,8 @@ It listens to live market data sent from the [Albion Data Client](https://github
 
 ---
 
+## 🧾 [Download](https://github.com/Vekeng/AlbionBlackLedger/releases)
+
 ## ⚙️ Requirements
 
 - [Albion Data Client](https://github.com/ao-data/albiondata-client/releases) (must be running and properly configured)
