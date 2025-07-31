@@ -1,6 +1,6 @@
 # 🧾 Albion Online Black Ledger
 
-## 🧾 Download [HERE](https://github.com/Vekeng/AlbionBlackLedger/releases)
+## Download [HERE](https://github.com/Vekeng/AlbionBlackLedger/releases)
 
 ## 📚 Table of Contents
 
