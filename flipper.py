@@ -49,8 +49,6 @@ locations = {
 def delete_row(buy_id, sell_id): 
     cursor = sqlite3.connect("marketdata.db")
     query = "DELETE FROM orders WHERE Id = ? OR Id = ?"
-    print(buy_id)
-    print(sell_id)
     cursor.execute(query, [buy_id, sell_id])
     cursor.commit()
     cursor.close()

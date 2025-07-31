@@ -193,14 +193,13 @@ def show_table():
         if popup and popup.winfo_exists():
             popup.destroy()
 
-        popup = tb.Frame(root, bootstyle="darkly", relief="raised", borderwidth=1)
-        btn = tb.Button(popup, text="Claim Flip", bootstyle="dark", command=lambda: claim_and_close_popup(row_id))
-        btn.pack(padx=5, pady=5)
-        popup.place(x=event.x_root - root.winfo_rootx(), y=event.y_root - root.winfo_rooty())
+        #popup = tb.Frame(root, bootstyle="darkly", relief="raised", borderwidth=1)
+        #btn = tb.Button(popup, text="Claim Flip", bootstyle="dark", command=lambda: claim_and_close_popup(row_id))
+        #btn.pack(padx=5, pady=5)
+        #popup.place(x=event.x_root - root.winfo_rootx(), y=event.y_root - root.winfo_rooty())
 
     def claim_and_close_popup(row_id):
         values = tree.item(row_id, "values")
-        print(values)
         flip = {"item": values[1], "enchantment": values[9], "profit": values[10]}
         claim_flip(flip)
         delete_row(values[0], values[5])
