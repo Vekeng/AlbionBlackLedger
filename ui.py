@@ -7,6 +7,8 @@ import sys
 import os
 from flipper import get_average_material_price
 from flipper import find_flip
+from flipper import claim_flip
+from flipper import delete_row
 
 
 if getattr(sys, 'frozen', False):
@@ -22,18 +24,22 @@ current_data = []
 
 # Predefined columns and mock location list
 COLUMNS = [
-    "ItemTypeId", "buy_location", "buy_quality",
-    "buy_price", "sell_location", "sell_quality", "sell_enchantment",
+    "buy_id", "ItemTypeId", "buy_location", "buy_quality", "buy_amount", 
+    "buy_price", "sell_id", "sell_location", "sell_quality", "sell_amount", "sell_enchantment",
     "sell_price", "enchantment", "profit"
 ]
 
 HEADINGS = [
+    "Buy Id",
     "Buy Item",
     "Buy Location",
     "Buy Quality",
+    "Buy Amount", 
     "Buy Price",
+    "Sell Id", 
     "Sell Location",
     "Sell Quality",
+    "Sell Amount",
     "Sell Item",
     "Sell Price",
     "Enchantment",
@@ -64,14 +70,29 @@ def show_table():
 
     from_var = tk.StringVar(value="Caerleon")
     to_var = tk.StringVar(value="Black Market")
+    order_var = tk.StringVar(value="Buy")
+
+    #def to_change(event): 
+    #    selected = to_menu.get()
+    #    if selected == "Black Market": 
+    #        order_menu.config(state="disabled")
+    #        order_menu.set("Buy")
+    #    else: 
+    #        order_menu.config(state="readonly")
 
     tb.Label(control_frame, text="From:", bootstyle="info").pack(side=tk.LEFT)
-    from_menu = tb.Combobox(control_frame, textvariable=from_var, values=list(LOCATIONS.keys()), state="readonly", bootstyle="dark")
+    from_menu = tb.Combobox(control_frame, textvariable=from_var, values=list(k for k in LOCATIONS if k != "Black Market"), state="readonly", bootstyle="dark")
     from_menu.pack(side=tk.LEFT, padx=5)
 
-    tb.Label(control_frame, text="To:", bootstyle="info").pack(side=tk.LEFT)
-    to_menu = tb.Combobox(control_frame, textvariable=to_var, values=list(LOCATIONS.keys()), state="readonly", bootstyle="dark")
-    to_menu.pack(side=tk.LEFT, padx=5)
+    #tb.Label(control_frame, text="To:", bootstyle="info").pack(side=tk.LEFT)
+    #to_menu = tb.Combobox(control_frame, textvariable=to_var, values=list(LOCATIONS.keys()), state="readonly", bootstyle="dark")
+    #to_menu.pack(side=tk.LEFT, padx=5)
+    #to_menu.bind("<<ComboboxSelected>>", to_change)
+    
+    #tb.Label(control_frame, text="Order Type", bootstyle="info").pack(side=tk.LEFT)
+    #order_menu = tb.Combobox(control_frame, textvariable=order_var, values=list(['Buy','Sell']), state="readonly", bootstyle="dark")
+    #order_menu.pack(side=tk.LEFT, padx=5)
+    #to_change(None)
 
     price_vars = {}
 
@@ -92,8 +113,9 @@ def show_table():
     def on_refresh():
         selected_from = LOCATIONS[from_var.get()]
         selected_to = LOCATIONS[to_var.get()]
+        order = order_var.get()
         material_prices = get_price_inputs()
-        new_data = find_flip(selected_from, selected_to, premium_var.get(), material_prices)
+        new_data = find_flip(selected_from, selected_to, premium_var.get(), material_prices, order)
         if new_data: 
             label.pack_forget()
             update_table(new_data)
@@ -134,12 +156,62 @@ def show_table():
             tree.column(col, anchor="center", width=220)
         else: 
             tree.column(col, anchor="center", width=100)
-            
+    tree.column("buy_id", width=0, stretch=False)
+    tree.heading("buy_id", text="")  # hide heading
+    tree.column("sell_id", width=0, stretch=False)
+    tree.heading("sell_id", text="")  # hide heading
 
     scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview, bootstyle="secondary")
     tree.configure(yscroll=scrollbar.set)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     tree.pack(fill=tk.BOTH, expand=True)
+
+    global popup
+    popup = None  # Global reference
+
+    def hide_popup(event=None):
+        global popup
+        if popup and popup.winfo_exists():
+            # Check if click was inside popup
+            widget = event.widget
+            if widget is popup or str(widget).startswith(str(popup)):
+                # Click inside popup — do nothing
+                return
+            popup.destroy()
+
+    def show_custom_popup(event):
+        global popup
+
+        row_id = tree.identify_row(event.y)
+        if not row_id:
+            return
+
+        tree.selection_set(row_id)
+        tree.focus(row_id)
+
+        # Destroy old popup if exists
+        if popup and popup.winfo_exists():
+            popup.destroy()
+
+        popup = tb.Frame(root, bootstyle="darkly", relief="raised", borderwidth=1)
+        btn = tb.Button(popup, text="Claim Flip", bootstyle="dark", command=lambda: claim_and_close_popup(row_id))
+        btn.pack(padx=5, pady=5)
+        popup.place(x=event.x_root - root.winfo_rootx(), y=event.y_root - root.winfo_rooty())
+
+    def claim_and_close_popup(row_id):
+        values = tree.item(row_id, "values")
+        print(values)
+        flip = {"item": values[1], "enchantment": values[9], "profit": values[10]}
+        claim_flip(flip)
+        delete_row(values[0], values[5])
+        on_refresh()
+        popup.destroy()
+
+    tree.bind("<Button-3>", show_custom_popup)
+    root.bind("<Button-1>", hide_popup)
+
+
+
 
     # Right: Material Prices in one vertical column grouped by tier
     price_frame = tb.Labelframe(content_frame, text="Material Prices", padding=10)

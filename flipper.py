@@ -46,6 +46,32 @@ locations = {
     "3003": "Black Market"
 }
 
+def delete_row(buy_id, sell_id): 
+    cursor = sqlite3.connect("marketdata.db")
+    query = "DELETE FROM orders WHERE Id = ? OR Id = ?"
+    print(buy_id)
+    print(sell_id)
+    cursor.execute(query, [buy_id, sell_id])
+    cursor.commit()
+    cursor.close()
+
+def claim_flip(flip): 
+    cursor = sqlite3.connect("marketdata.db")
+    query = """
+            INSERT OR REPLACE INTO claimed (
+                ItemTypeId, 
+                Enchantment, 
+                Profit
+            ) VALUES (
+                :item,
+                :enchantment, 
+                :profit
+            )
+    """
+    cursor.execute(query, flip)
+    cursor.commit()
+    cursor.close()
+
 def get_average_material_price(item_type_id, location_id="3003"):
     query = """
             WITH ordered_orders AS (
@@ -122,31 +148,44 @@ def calculate_total_enchant_cost(item_group_type_id, tier, enchant_from, enchant
 
     return total_cost, materials_detailed
 
-def find_flip(from_market="3005", to_market="3003", premium=True, material_prices=None):
+def find_flip(from_market="3005", to_market="3003", premium=True, material_prices=None, order='Buy'):
     tax_rate = 0.96 if premium else 0.92
     connect = sqlite3.connect("marketdata.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
+    order_type = {
+        "Buy": "request",
+        "Sell": "offer"
+    }
+    agg_func = "MIN" if order == "Sell" else "MAX"
+    quality_join = "=" if order == "Sell" else ">="
+
     rows = cursor.execute(
-        """
+        f"""
         SELECT
+            buy.Id AS buy_id,
             buy.ItemTypeId,
             buy.ItemGroupTypeId,
             buy.LocationId AS buy_location,
             buy.QualityLevel AS buy_quality,
+            buy.Amount AS buy_amount, 
             buy.EnchantmentLevel AS buy_enchantment,
             buy.MinPrice / 10000 AS buy_price,
+            sell.Id AS sell_id,
             sell.LocationId AS sell_location,
             sell.QualityLevel AS sell_quality,
+            sell.Amount AS sell_amount, 
             sell.EnchantmentLevel AS sell_enchantment,
             sell.MaxPrice / 10000 AS sell_price
         FROM (
             SELECT 
+                Id, 
                 ItemTypeId,
                 ItemGroupTypeId,
                 LocationId,
                 QualityLevel,
+                Amount, 
                 EnchantmentLevel,
                 MIN(UnitPriceSilver) AS MinPrice
             FROM 
@@ -158,30 +197,36 @@ def find_flip(from_market="3005", to_market="3003", premium=True, material_price
         ) AS buy
         JOIN (
             SELECT 
+                Id,
                 ItemTypeId,
                 ItemGroupTypeId,
                 LocationId,
                 QualityLevel,
+                Amount,
                 EnchantmentLevel,
-                MAX(UnitPriceSilver) AS MaxPrice
+                {agg_func}(UnitPriceSilver) AS MaxPrice
             FROM 
                 orders
             WHERE 
-                AuctionType = 'request' AND LocationId = ?
+                AuctionType = ? AND LocationId = ?
             GROUP BY 
                 ItemGroupTypeId, LocationId, QualityLevel, EnchantmentLevel
         ) AS sell
         ON buy.ItemGroupTypeId = sell.ItemGroupTypeId
-        AND buy.QualityLevel >= sell.QualityLevel
+        AND buy.QualityLevel {quality_join} sell.QualityLevel
         AND buy.EnchantmentLevel <= sell.EnchantmentLevel
         """,
-        [from_market, to_market],
+        [from_market, order_type[order], to_market],
     ).fetchall()
 
     cursor.close()
     result = []
 
     for row in rows:
+        buy_id = row["buy_id"]
+        sell_id = row["sell_id"]
+        buy_amount = row["buy_amount"]
+        sell_amount = row["sell_amount"]
         item = row["ItemTypeId"]  # with enchant suffix, for display
         item_group = row["ItemGroupTypeId"]  # base item without enchant suffix
         enchant_from = row["buy_enchantment"]
@@ -210,21 +255,27 @@ def find_flip(from_market="3005", to_market="3003", premium=True, material_price
         else:
             tier = None  
 
-        if profit > 0:
-            result.append(
-                {
-                    "ItemTypeId": items_map[item] + " " + str(tier) + "." + str(enchant_from),
-                    "buy_location": locations[str(row["buy_location"])],
-                    "buy_quality": qualities[row["buy_quality"]],
-                    "buy_price": round(row["buy_price"]),
-                    "sell_location": locations[str(row["sell_location"])],
-                    "sell_quality": qualities[row["sell_quality"]],
-                    "sell_enchantment": items_map[item] + " " + str(tier) + "." + str(enchant_to),
-                    "enchantment": enchantment_str,
-                    "sell_price": round(row["sell_price"]),
-                    "profit": profit,
-                }
-            )
+        item_name = items_map.get(item)
+        if item_name is not None: 
+            if profit > 0:
+                result.append(
+                    {
+                        "buy_id": buy_id,
+                        "ItemTypeId": item_name + " " + str(tier) + "." + str(enchant_from),
+                        "buy_location": locations[str(row["buy_location"])],
+                        "buy_quality": qualities[row["buy_quality"]],
+                        "buy_amount": buy_amount, 
+                        "buy_price": round(row["buy_price"]),
+                        "sell_id": sell_id, 
+                        "sell_location": locations[str(row["sell_location"])],
+                        "sell_quality": qualities[row["sell_quality"]],
+                        "sell_amount": sell_amount,
+                        "sell_enchantment": item_name + " " + str(tier) + "." + str(enchant_to),
+                        "enchantment": enchantment_str,
+                        "sell_price": round(row["sell_price"]),
+                        "profit": profit,
+                    }
+                )
 
     result.sort(key=lambda x: x["profit"], reverse=True)
     return result

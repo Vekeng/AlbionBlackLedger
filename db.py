@@ -16,6 +16,15 @@ def create():
                         Expires TEXT NOT NULL)
                     '''
     );
+    cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS claimed (
+                   Id INTEGER PRIMARY KEY, 
+                   ItemTypeId TEXT NOT NULL,
+                   Enchantment INTEGER NOT NULL, 
+                   Profit INTEGER NOT NULL)
+                   '''
+    )
+    cursor.commit()
     cursor.close()
 
 def truncate(): 
