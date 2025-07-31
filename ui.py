@@ -216,12 +216,15 @@ def show_table():
     price_frame = tb.Labelframe(content_frame, text="Material Prices", padding=10)
     price_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(10, 0), anchor="n")
 
-    def populate_material_prices():
+    def populate_material_prices(reset=False):
         selected_from = LOCATIONS[from_var.get()]
         for tier in tiers:
             for mat in materials:
                 item_type = f"T{tier}_{mat}"
-                avg_price = get_average_material_price(item_type, selected_from)
+                if not reset: 
+                    avg_price = get_average_material_price(item_type, selected_from)
+                else: 
+                    avg_price = 0
                 key = f"T{tier}_{mat}"
                 if key in price_vars:
                     price_vars[key].set(str(avg_price))
@@ -243,6 +246,7 @@ def show_table():
             tb.Label(mat_frame, text=mat + ":", width=8, anchor="w").pack(side=tk.LEFT)
             tb.Entry(mat_frame, textvariable=price_vars[key], width=10).pack(side=tk.LEFT)
     tb.Button(price_frame, text="Get Prices", command=populate_material_prices, bootstyle="success").pack(fill="x", pady=(10, 0))
+    tb.Button(price_frame, text="Reset Prices", command=lambda: populate_material_prices(True), bootstyle="danger").pack(fill="x", pady=(10, 0))
     estimate = tb.Label(
         price_frame,
         text="Prices are approximate, calculated from the 2,000 cheapest materials",
