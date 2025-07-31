@@ -1,5 +1,17 @@
 # 🧾 Albion Online Black Ledger
 
+## 📚 Table of Contents
+
+- [🧾 Albion Online Black Ledger](#-albion-online-black-ledger)
+- [⚙️ Requirements](#️-requirements)
+- [✨ Features](#-features)
+- [📥 Albion Data Client](#-albion-data-client)
+  - [On Windows](#on-windows)
+  - [On Linux](#on-linux)
+- [💡 How to use Black Ledger](#-how-to-use-black-ledger)
+
+---
+
 **Albion Online Black Ledger** is a local desktop application that helps you track your market flips and evaluate Black Market trading opportunities in **Albion Online**.
 
 It listens to live market data sent from the [Albion Data Client](https://github.com/ao-data/albiondata-client) and stores it locally in an SQLite database for filtering, sorting, and future analysis — all within a clean graphical interface.
