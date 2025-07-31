@@ -102,8 +102,6 @@ def get_average_material_price(item_type_id, location_id="3003"):
     cur = conn.cursor()
     cur.execute(query, (location_id, item_type_id))
     row = cur.fetchone()
-    print(item_type_id)
-    print(row)
     cur.close()
     conn.close()
     return row[0] if row[0] else 0
