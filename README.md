@@ -21,7 +21,7 @@ It listens to live market data sent from the [Albion Data Client](https://github
 
 ---
 
-## 📥 Install Albion Data Client
+## 📥 Albion Data Client
 
 1. **Download the latest release from:**
 
@@ -31,17 +31,31 @@ It listens to live market data sent from the [Albion Data Client](https://github
 
 ### On Windows
 Start the albiondata-client.exe with `-i http://localhost:5000`: 
-1. **Open Command Prompt or PowerShell**  
+3. **Open Command Prompt or PowerShell**  
    - Press `Win + R`, type `cmd` or `powershell`, then press Enter.
 
-2. **Navigate to the installation folder**  
+4. **Navigate to the installation folder**  
 
    ```powershell
    cd "C:\Program Files\Albion Data Client"
 
-3. **Run the client with the local server URL**
+5. **Run the client with the local server URL**
 
    .\albiondata-client.exe -i http://localhost:5000
 
 ### On Linux
 If you are on Linux, you should now what to do. 
+
+---
+
+## 💡How to use Black Ledger
+
+1. **With Albion Data Client running, scan the market where you buy items and Black Market** - open market and start browsing items for potential flips. 
+
+2. **Set "From" field in Black Ledger to market where you buy items**
+
+3. **Optionally scan prices of the echantment materials: runes, souls, relics. Press "Get Prices" button in Black Ledger to set the prices**
+
+4. **Press "Find Flips!"** - you will see possible flips in Black Ledger. If there are possible enchantment flips - you will see the costs of enchantments. 
+
+5. **After you finish flipping session, press "Clear Data"**
