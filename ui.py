@@ -231,6 +231,10 @@ def show_table():
             tree.column(col, anchor="center", width=160)
         else: 
             tree.column(col, anchor="center", width=100)
+    tree.column("buy_id", width=0, stretch=False)
+    tree.heading("buy_id", text="")  # hide heading
+    tree.column("sell_id", width=0, stretch=False)
+    tree.heading("sell_id", text="")  # hide heading
 
 
     scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview, bootstyle="secondary")
