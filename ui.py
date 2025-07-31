@@ -150,10 +150,12 @@ def show_table():
     tree = ttk.Treeview(table_frame, columns=COLUMNS, show="headings", style="dark.Treeview")
     for col, heading in zip(COLUMNS, HEADINGS):
         tree.heading(col, text=heading, command=lambda c=col: sort_column(tree, c, False))
-        if col in ("buy_price", "sell_price", "buy_quality", "sell_quality"):
-            tree.column(col, anchor="center", width=20)
+        if col in ("buy_price", "sell_price", "buy_quality", "sell_quality", "buy_amount", "sell_amount", "buy_location", "sell_location", "profit"):
+            tree.column(col, anchor="center", width=100, stretch=False)
         elif col == "enchantment": 
-            tree.column(col, anchor="center", width=220)
+            tree.column(col, anchor="center", width=200)
+        elif col in ("ItemTypeId", "sell_enchantment"):
+            tree.column(col, anchor="center", width=160)
         else: 
             tree.column(col, anchor="center", width=100)
     tree.column("buy_id", width=0, stretch=False)
@@ -257,8 +259,8 @@ def show_table():
         justify="center"
         )
     estimate.pack(pady=5)
-    root.geometry("1280x900")
-    root.minsize(width=1280, height=900)
+    root.geometry("1600x900")
+    #root.minsize(width=1280, height=900)
     root.mainloop()
 
 
