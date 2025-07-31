@@ -50,7 +50,7 @@ If you are on Linux, you should now what to do.
 
 ## 💡How to use Black Ledger
 
-1. **With Albion Data Client running, scan the market where you buy items and Black Market** - open market and start browsing items for potential flips. 
+1. **With Albion Data Client running, scan the market where you buy items and Black Market** - go to market in game and start browsing items for potential flips. 
 
 2. **Set "From" field in Black Ledger to market where you buy items**
 
