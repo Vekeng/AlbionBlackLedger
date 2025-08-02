@@ -25,7 +25,7 @@ def create():
                         buy_quality TEXT NOT NULL,
                         buy_amount INTEGER NOT NULL,
                         buy_price INTEGER NOT NULL,
-                        sell_id INTEGER UNIQUE NOT NULL,
+                        sell_id INTEGER NOT NULL,
                         sell_location TEXT NOT NULL,
                         sell_quality TEXT NOT NULL,
                         sell_amount INTEGER NOT NULL,

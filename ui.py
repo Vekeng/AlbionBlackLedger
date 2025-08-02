@@ -248,15 +248,12 @@ def show_table():
     def hide_popup(event=None):
         global popup
         if popup and popup.winfo_exists():
-            # Check if click was inside popup
             widget = event.widget
             if widget is popup or str(widget).startswith(str(popup)):
-                # Click inside popup — do nothing
                 return
             popup.destroy()
 
     def show_custom_popup(event):
-        print(event)
         global popup
 
         row_id = tree.identify_row(event.y)
@@ -271,8 +268,10 @@ def show_table():
             popup.destroy()
 
         popup = tb.Frame(root, bootstyle="darkly", relief="raised", borderwidth=1)
-        btn = tb.Button(popup, text="Claim Flip", bootstyle="dark", command=lambda: claim_and_close_popup(row_id))
+        btn = tb.Button(popup, text="Claim Flip", bootstyle="dark", command=lambda: action_and_close_popup(row_id, "claim"))
+        delflip = tb.Button(popup, text="Delete Flip", bootstyle="dark", command=lambda: action_and_close_popup(row_id, "delete"))
         btn.pack(padx=5, pady=5)
+        delflip.pack(padx=5, pady=5)
         popup.place(x=event.x_root - root.winfo_rootx(), y=event.y_root - root.winfo_rooty())
 
     def get_row_as_dict(tree, row_id):
@@ -281,9 +280,10 @@ def show_table():
         row_dict = dict(zip(columns, row_values))
         return row_dict
 
-    def claim_and_close_popup(row):
+    def action_and_close_popup(row, action="delete"):
         flip = get_row_as_dict(tree, row)
-        claim_flip(flip)
+        if action == "claim": 
+            claim_flip(flip)
         delete_row(flip['buy_id'], flip['sell_id'])
         on_refresh()
         data = get_all_claims()
@@ -292,7 +292,7 @@ def show_table():
         popup.destroy()
 
     tree.bind("<Button-3>", show_custom_popup)
-    root.bind("<Button-1>", hide_popup)
+    tree.bind("<Button-1>", hide_popup)
 
     # Right: Material Prices in one vertical column grouped by tier
     price_frame = tb.Labelframe(available_tab, text="Material Prices", padding=10)
@@ -404,7 +404,7 @@ def show_table():
 
     # Bind the events on claimed_tree:
     claimed_tree.bind("<Button-3>", show_claimed_popup)
-    root.bind("<Button-1>", hide_claimed_popup)
+    claimed_tree.bind("<Button-1>", hide_claimed_popup)
 
     root.geometry("1600x900")
     #root.minsize(width=1280, height=900)
