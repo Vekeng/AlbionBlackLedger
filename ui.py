@@ -196,6 +196,7 @@ def show_table():
 
     # === Status Label === 
     status_label = tk.Label(root, text="", font=("Segoe UI", 10), anchor="e", justify="right")
+    status_label.config(text="⭕ Data Client is NOT running", fg="red")
     status_label.pack(side="bottom", fill="x", padx=10)
 
     # === Main Content Frame ===
@@ -416,10 +417,11 @@ def show_table():
             status_label.config(text="⭕ Data Client is NOT running", fg="red")
         root.after(3000, update_status)  # check again in 3 seconds
 
-    update_status()
     claimed_data = get_all_claims()
     update_table(claimed_data, claimed_tree)
+    root.after(100, update_status)
     root.mainloop()
+
 
 def update_table(data, tree):
     tree.delete(*tree.get_children())
